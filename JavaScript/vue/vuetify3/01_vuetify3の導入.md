@@ -25,6 +25,8 @@ npm install vuetify@latest
 
 ```bash
 npm install sass sass-loader@^13 vite-plugin-vuetify
+// Vue Router を使う場合
+npm install vue-router@4
 ```
 
 ---
