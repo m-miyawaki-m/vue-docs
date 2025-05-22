@@ -5,5 +5,6 @@ import 'vuetify/styles'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router'
+import store from './store'
 
-createApp(App).use(vuetify).use(router).mount('#app')
+createApp(App).use(store).use(vuetify).use(router).mount('#app')

@@ -1,0 +1,11 @@
+{
+  "headers": [
+    { "title": "名前", "key": "name" },
+    { "title": "ステータス", "key": "status" },
+    { "title": "操作", "key": "actions", "sortable": false }
+  ],
+  "items": [
+    { "name": "ユーザー1", "status": "ok" },
+    { "name": "ユーザー2", "status": "ng" }
+  ]
+}

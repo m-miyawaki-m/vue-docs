@@ -68,71 +68,70 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import okIcon from '@/assets/icons/ok.png'
 import ngIcon from '@/assets/icons/ng.png'
+import okIcon from '@/assets/icons/ok.png'
 import ChartView from '@/components/ChartView.vue'
-
+import { computed, defineComponent, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 
 export default defineComponent({
-  setup() {
-    const router = useRouter()
-    const dialog = ref(false)
-    const selectedItem = ref({})
-    const showChart = ref(false)
+setup() {
+  const router = useRouter()
+  const dialog = ref(false)
+  const selectedItem = ref({})
+  const showChart = ref(false)
+  const formRef = ref(null)
 
-    const formRef = ref(null) // v-form の参照用
-    const submit = () => {
-      // バリデーションチェック（必要であれば）
-      const form = formRef.value
-      if (form) {
-        // ここでエラーチェックなども可能
-        console.log('保存されたデータ:', selectedItem.value)
+  const store = useStore() // ✅ ここが先！
 
-        // ✅ ダイアログを閉じる
-        dialog.value = false
-      }
+  const headers = computed(() => store.getters.headers)
+  const items = computed(() => store.getters.items)
+
+  onMounted(async () => {
+    const res = await fetch('/data/tableData.json')
+    const data = await res.json()
+    store.commit('setHeaders', data.headers)
+    store.commit('setItems', data.items)
+  })
+
+  const submit = () => {
+    const form = formRef.value
+    if (form) {
+      // ✅ Vuex ストアの items を更新
+      store.commit('updateItem', selectedItem.value)
+
+      // ✅ ダイアログを閉じる
+      dialog.value = false
     }
-
-    const headers = [
-      { title: '名前', key: 'name' },
-      { title: 'ステータス', key: 'status' },
-      { title: '操作', key: 'actions', sortable: false },
-    ]
-
-    const items = [
-      { name: 'ユーザー1', status: 'ok' },
-      { name: 'ユーザー2', status: 'ng' },
-    ]
-
-    const openDialog = (item) => {
-      selectedItem.value = item
-      dialog.value = true
-    }
-
-    const goToDetail = (item) => {
-      selectedItem.value = item
-      showChart.value = true // ← これで ChartView に切り替え
-      // router.push(`/detail/${item.name}`) ← ルーティングは不要ならコメントアウト
-    }
-
-    return {
-      headers,
-      items,
-      okIcon,
-      ngIcon,
-      dialog,
-      selectedItem,
-      openDialog,
-      goToDetail,
-      formRef,    // ← 追加
-      submit,     // ← 追加
-      ChartView,
-      showChart,
   }
 
+  const openDialog = (item) => {
+    selectedItem.value = item
+    dialog.value = true
   }
+
+  const goToDetail = (item) => {
+    selectedItem.value = item
+    showChart.value = true
+  }
+
+  return {
+    headers,
+    items,
+    okIcon,
+    ngIcon,
+    dialog,
+    selectedItem,
+    openDialog,
+    goToDetail,
+    formRef,
+    submit,
+    ChartView,
+    showChart,
+  }
+}
+
 })
 </script>
