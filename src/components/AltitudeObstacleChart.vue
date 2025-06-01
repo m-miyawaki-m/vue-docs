@@ -1,31 +1,21 @@
 <template>
-  <v-card>
-    <v-card-title>飛行経路と障害物</v-card-title>
-    <v-card-text>
-      <canvas ref="canvasRef"></canvas>
-    </v-card-text>
-  </v-card>
+  <apexchart
+    type="line"
+    height="350"
+    :options="chartOptions"
+    :series="chartSeries"
+  />
 </template>
 
 <script lang="ts">
-import {
-  CategoryScale,
-  Chart,
-  Filler,
-  Legend,
-  LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip
-} from 'chart.js'
-import { defineComponent, onMounted, ref } from 'vue'
-
-Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend, Filler)
+import { defineComponent } from 'vue'
+import VueApexCharts from 'vue3-apexcharts'
 
 export default defineComponent({
   name: 'AltitudeObstacleChart',
+  components: {
+    apexchart: VueApexCharts
+  },
   props: {
     timeLabels: {
       type: Array as () => string[],
@@ -40,58 +30,72 @@ export default defineComponent({
       required: true
     }
   },
-  setup(props) {
-    const canvasRef = ref<HTMLCanvasElement | null>(null)
-
-    onMounted(() => {
-      if (canvasRef.value) {
-        const maxAltitude = Math.max(...props.altitudeData)
-        const yMax = Math.ceil(maxAltitude * 1.1)
-
-        new Chart(canvasRef.value, {
+  computed: {
+    chartOptions(): any {
+      return {
+        chart: {
           type: 'line',
-          data: {
-            labels: props.timeLabels,
-            datasets: [
-              {
-                label: '高度',
-                data: props.altitudeData,
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                tension: 0.3,
-                fill: false,
-                pointRadius: 0
-              },
-              {
-                label: '障害物',
-                data: props.obstacleData,
-                borderColor: 'rgba(255, 99, 132, 0.8)',
-                backgroundColor: 'rgba(255, 99, 132, 0.3)',
-                fill: 'origin',
-                tension: 0.3,
-                pointRadius: 0
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'top' },
-              title: { display: true, text: '飛行高度と障害物の推移' }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                suggestedMax: yMax
-              }
-            }
+          height: 350,
+          toolbar: { show: false },
+          zoom: { enabled: false }
+        },
+        stroke: {
+          width: [3, 2],
+          curve: 'smooth'
+        },
+        fill: {
+          type: ['solid', 'gradient'],
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.4,
+            opacityTo: 0.1,
+            stops: [0, 90, 100]
           }
-        })
+        },
+        markers: {
+          size: 5,
+          discrete: [
+            {
+              seriesIndex: 0, // 高度の線
+              size: 5
+            },
+            {
+              seriesIndex: 1, // 障害物にはポイント非表示
+              size: 0
+            }
+          ]
+        },
+        colors: ['#2196F3', '#F48FB1'],
+        xaxis: {
+          categories: this.timeLabels,
+          title: {
+            text: '時間'
+          }
+        },
+        yaxis: {
+          title: {
+            text: '高度 / 障害物'
+          }
+        },
+        legend: {
+          position: 'top'
+        },
+        
       }
-    })
-
-    return {
-      canvasRef
+    },
+    chartSeries(): any[] {
+      return [
+        {
+          name: '高度',
+          type: 'line',
+          data: this.altitudeData
+        },
+        {
+          name: '障害物',
+          type: 'area',
+          data: this.obstacleData
+        }
+      ]
     }
   }
 })

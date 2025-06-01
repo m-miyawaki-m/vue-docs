@@ -1,5 +1,6 @@
 <template>
   <v-container class="d-flex align-center" style="width: 100%;">
+    <!-- プルダウンでセンサー種別選択 -->
     <v-select
       v-model="selectedType"
       :items="typeOptions"
@@ -8,21 +9,26 @@
       outlined
       style="max-width: 150px; margin-right: 16px"
     />
+    <!-- センサーON/OFFチャート -->
     <div style="flex: 1;">
       <apexchart
         type="rangeBar"
         height="300"
         :options="chartOptions"
         :series="chartSeries"
-        :key="chartKey"
       />
     </div>
   </v-container>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
+
+interface RangeBarItem {
+  name: string;
+  data: { x: string; y: [number, number] }[];
+}
 
 export default defineComponent({
   name: 'SensorOnOffChart',
@@ -31,7 +37,7 @@ export default defineComponent({
   },
   props: {
     data: {
-      type: Object as () => Record<string, any[]>,
+      type: Object as () => Record<string, RangeBarItem>,
       required: true
     },
     timeRange: {
@@ -44,76 +50,49 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const selectedType = ref('typeA')
+    // プルダウンで選ばれたセンサー種別
+    const selectedType = ref(Object.keys(props.data)[0])
     const typeOptions = Object.keys(props.data)
 
-    const chartKey = ref(0)
-    let intervalId: number
-    onMounted(() => {
-      // intervalId = window.setInterval(() => {
-      //   chartKey.value++
-      // }, 1000)
-    })
-
-    onBeforeUnmount(() => {
-      // clearInterval(intervalId)
-    })
-
+    // 現在選択中のセンサーデータを1件だけ渡す
     const chartSeries = computed(() => {
-      return props.data[selectedType.value] || []
+      const selected = props.data[selectedType.value]
+      return selected ? [selected] : []
     })
 
-    const chartOptions = computed(() => {
-      return {
-        chart: {
-          type: 'rangeBar',
-          toolbar: { show: false },
-          zoom: { enabled: false },
-          height: 300,
-          animations: {
-            enabled: false
-          }
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            rangeBarGroupRows: true
-          }
-        },
-        grid: {
-          padding: {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0
-          }
-        },
-        xaxis: {
-          type: 'datetime',
-          min: props.missileRange.start,
-          max: props.missileRange.end,
-          labels: {
-            datetimeUTC: false,
-            format: 'HH:mm'
-          }
-        },
-        tooltip: {
-          x: {
-            format: 'yyyy-MM-dd HH:mm'
-          }
-        },
-        title: {
-          text: ''
+    const chartOptions = computed(() => ({
+      chart: {
+        type: 'rangeBar',
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        height: 300,
+        animations: { enabled: false }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          rangeBarGroupRows: true
         }
+      },
+      xaxis: {
+        type: 'datetime',
+        min: props.missileRange.start,
+        max: props.missileRange.end,
+        labels: {
+          datetimeUTC: false,
+          format: 'HH:mm'
+        }
+      },
+      tooltip: {
+        x: { format: 'yyyy-MM-dd HH:mm' }
       }
-    })
+    }))
 
     return {
       selectedType,
       typeOptions,
       chartSeries,
-      chartOptions,
-      chartKey
+      chartOptions
     }
   }
 })
