@@ -2,18 +2,17 @@
   <v-container>
     <AltitudeObstacleChart :timeLabels="timeLabels" :altitudeData="altitude" :obstacleData="obstacles" />
   </v-container>
-  <v-container>
+  <!-- <v-container>
     <RangeBarChart :items="rangeData" />
-  </v-container>
-  <v-container>
+  </v-container> -->
+  <!-- <v-container>
     <RangeBarChart2 :items="rangeData2" />
-  </v-container>
+  </v-container> -->
   <v-container>
     <SensorOnOffChart
       :data="sensorTimelineChartData"
       :timeRange="timeRange"
       :missileRange="missileRange"
-      :periodMs="60000"
     />
   </v-container>
 </template>
@@ -55,15 +54,19 @@ export default defineComponent({
     ];
 
     const missileStart = new Date('2025-06-01T09:00:00')
-    const missileEnd = new Date('2025-06-01T10:30:00')
+    const missileEnd = new Date('2025-06-01T10:50:00')
 
-    const generateSensorPattern = (name: string, flightRanges: { start: Date; end: Date }[], intervalMs: number): RangeBarItem => {
+    const generateSensorPattern = (
+      name: string,
+      flightInfos: { flightName: string; start: Date; end: Date }[],
+      intervalMs: number
+    ): RangeBarItem => {
       const data: { x: string; y: [number, number] }[] = []
-      for (const { start, end } of flightRanges) {
+      for (const { flightName, start, end } of flightInfos) {
         let toggle = true
         for (let t = start.getTime(); t < end.getTime(); t += intervalMs) {
           if (toggle) {
-            data.push({ x: 'ON', y: [t, t + intervalMs] })
+            data.push({ x: flightName, y: [t, t + intervalMs] })
           }
           toggle = !toggle
         }
@@ -71,11 +74,12 @@ export default defineComponent({
       return { name, data }
     }
 
-    const flightRanges = [
-      { start: new Date('2025-06-01T10:00:00'), end: new Date('2025-06-01T10:15:00') },
-      { start: new Date('2025-06-01T10:20:00'), end: new Date('2025-06-01T10:30:00') },
-      { start: new Date('2025-06-01T10:35:00'), end: new Date('2025-06-01T10:45:00') }
+    const flightInfos = [
+      { flightName: 'Flight A', start: new Date('2025-06-01T10:00:00'), end: new Date('2025-06-01T10:15:00') },
+      { flightName: 'Flight B', start: new Date('2025-06-01T10:20:00'), end: new Date('2025-06-01T10:30:00') },
+      { flightName: 'Flight C', start: new Date('2025-06-01T10:35:00'), end: new Date('2025-06-01T10:45:00') }
     ]
+
 
     return {
       rangeData,
@@ -89,11 +93,10 @@ export default defineComponent({
       rangeData2: [
         {
           name: 'フライト',
-          data: [
-            { x: 'Flight A', y: ['2025-06-01T10:00:00', '2025-06-01T10:15:00'] },
-            { x: 'Flight B', y: ['2025-06-01T10:20:00', '2025-06-01T10:30:00'] },
-            { x: 'Flight C', y: ['2025-06-01T10:35:00', '2025-06-01T10:45:00'] }
-          ]
+          data: flightInfos.map(f => ({
+            x: f.flightName,
+            y: [f.start.toISOString(), f.end.toISOString()]
+          }))
         }
       ],
       timeRange: {
@@ -104,11 +107,11 @@ export default defineComponent({
         start: missileStart.getTime(),
         end: missileEnd.getTime()
       },
-      sensorTimelineChartData: {
-        typeA: [generateSensorPattern('センサーA', flightRanges, 60000)],
-        typeB: [generateSensorPattern('センサーB', flightRanges, 60000)],
-        type3: [generateSensorPattern('センサー3', flightRanges, 60000)]
-      }
+  sensorTimelineChartData: {
+    typeA: [generateSensorPattern('type A', flightInfos, 60000)],
+    typeB: [generateSensorPattern('type B', flightInfos, 60000)],
+    typeC: [generateSensorPattern('type C', flightInfos, 60000)]
+  },
     }
   }
 })

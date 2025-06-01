@@ -50,13 +50,13 @@ export default defineComponent({
     const chartKey = ref(0)
     let intervalId: number
     onMounted(() => {
-      // intervalId = window.setInterval(() => {
-      //   chartKey.value++
-      // }, 1000)
+      intervalId = window.setInterval(() => {
+        chartKey.value++
+      }, 1000)
     })
 
     onBeforeUnmount(() => {
-      // clearInterval(intervalId)
+      clearInterval(intervalId)
     })
 
     const chartSeries = computed(() => {
