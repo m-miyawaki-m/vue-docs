@@ -22,13 +22,10 @@
 </template>
 
 <script lang="ts">
+import type { PropType } from 'vue';
 import { computed, defineComponent, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
-
-interface RangeBarItem {
-  name: string;
-  data: { x: string; y: [number, number] }[];
-}
+import type { RangeBarItem } from '../types/chart'; // ← 外
 
 export default defineComponent({
   name: 'SensorOnOffChart',
@@ -37,15 +34,15 @@ export default defineComponent({
   },
   props: {
     data: {
-      type: Object as () => Record<string, RangeBarItem>,
+      type: Object as PropType<Record<string, RangeBarItem>>,
       required: true
     },
     timeRange: {
-      type: Object as () => { min: number; max: number },
+      type: Object as PropType<{ min: number; max: number }> ,
       required: true
     },
     missileRange: {
-      type: Object as () => { start: number; end: number },
+      type: Object as PropType<{ start: number; end: number }> ,
       required: true
     }
   },
