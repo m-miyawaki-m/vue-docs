@@ -1,0 +1,33 @@
+[
+  {
+    "operationId": "OP001",
+    "plans": [
+      {
+        "planId": "PL001",
+        "measures": [
+          { "measureId": "MS001" },
+          { "measureId": "MS002" }
+        ]
+      },
+      {
+        "planId": "PL002",
+        "measures": [
+          { "measureId": "MS003" }
+        ]
+      }
+    ]
+  },
+  {
+    "operationId": "OP002",
+    "plans": [
+      {
+        "planId": "PL003",
+        "measures": [
+          { "measureId": "MS004" },
+          { "measureId": "MS005" },
+          { "measureId": "MS006" }
+        ]
+      }
+    ]
+  }
+]
